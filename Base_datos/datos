@@ -1,0 +1,75 @@
+ENTREGABLE 01 FINAL    
+
+CREATE TABLE "usuarios" (
+    "id" SERIAL PRIMARY KEY,
+    "nombre" VARCHAR(100) NOT NULL,
+    "apellido" VARCHAR(100) NOT NULL,
+    "email" VARCHAR(255) NOT NULL UNIQUE, -- Usado como identificador para el login
+    "rol" VARCHAR(50) NOT NULL, -- Ej: 'administrador', 'gerente_proyecto', 'desarrollador', 'qa'
+    "fecha_registro" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+INSERT INTO "usuarios" ("nombre", "apellido", "email", "rol") VALUES
+('Ana', 'Gómez', 'ana.gomez@tecnosol.com', 'administrador'),
+('Carlos', 'Ruiz', 'carlos.ruiz@tecnosol.com', 'gerente_proyecto'),
+('Laura', 'Pérez', 'laura.perez@tecnosol.com', 'desarrollador');
+
+SELECT * FROM usuarios;
+
+--------------------------------------------------------
+CREATE TABLE "credenciales" (
+    "id_usuario" INT PRIMARY KEY,
+    "password_hash" VARCHAR(255) NOT NULL, -- ¡Almacena siempre el hash de la contraseña, gestionado por PHP!
+    "estado" VARCHAR(20) DEFAULT 'activo', -- Ej: 'activo', 'inactivo', 'bloqueado'
+    FOREIGN KEY ("id_usuario") REFERENCES "usuarios"("id") ON DELETE CASCADE
+);
+
+INSERT INTO "credenciales" ("id_usuario", "password_hash", "estado") VALUES
+(1, 'password123_ana', 'activo'),
+(2, 'password123_carlos', 'activo'),
+(3, 'password123_laura', 'activo');
+
+Select * from credenciales;
+
+--------------------------------------------------------
+CREATE TABLE "clientes" (
+    "id" SERIAL PRIMARY KEY,
+    "nombre_empresa" VARCHAR(255) NOT NULL,
+    "contacto_principal" VARCHAR(200) NOT NULL,
+    "email_contacto" VARCHAR(255) NOT NULL,
+    "telefono_contacto" VARCHAR(50),
+    "direccion" TEXT,
+    "fecha_registro" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+INSERT INTO "clientes" ("nombre_empresa", "contacto_principal", "email_contacto", "telefono_contacto", "direccion") VALUES
+('Soluciones Creativas S.A.', 'Marta Torres', 'marta.t@solucionescreativas.com', '123-456-7890', 'Av. La Luna 123, Lima'),
+('Innovación Digital SAC', 'Ricardo Soto', 'ricardo.s@innovaciondigital.com', '987-654-3210', 'Calle del Sol 45, Arequipa'),
+('Global Marketing SRL', 'Elena Vidal', 'elena.v@globalmarketing.com', '555-111-2222', 'Jr. Las Flores 789, Cusco');
+
+select * from clientes;
+
+
+---------------------------------------------------------------
+CREATE TABLE "proyectos" (
+    "id" SERIAL PRIMARY KEY,
+    "nombre_proyecto" VARCHAR(255) NOT NULL,
+    "descripcion" TEXT,
+    "id_cliente" INT NOT NULL, -- FK a la tabla "clientes"
+    "id_gerente_proyecto" INT NOT NULL, -- FK a la tabla "usuarios" (el usuario interno que gestiona el proyecto)
+    "estado" VARCHAR(50) DEFAULT 'pendiente', -- Ej: 'pendiente', 'en_progreso', 'completado', 'cancelado'
+    "fecha_inicio" DATE,
+    "fecha_fin_estimada" DATE,
+    "fecha_fin_real" DATE DEFAULT NULL,
+    "presupuesto" NUMERIC(10, 2),
+    FOREIGN KEY ("id_cliente") REFERENCES "clientes"("id") ON DELETE CASCADE,
+    FOREIGN KEY ("id_gerente_proyecto") REFERENCES "usuarios"("id") ON DELETE RESTRICT
+);
+
+INSERT INTO "proyectos" ("nombre_proyecto", "descripcion", "id_cliente", "id_gerente_proyecto", "estado", "fecha_inicio", "fecha_fin_estimada", "presupuesto") VALUES
+('Portal Web Corporativo', 'Desarrollo de un nuevo portal web con CMS para SC S.A.', 1, 2, 'en_progreso', '2025-07-01', '2025-09-30', 15000.00),
+('Sistema de Gestión Interna', 'Automatización de procesos internos para Innovación Digital.', 2, 1, 'pendiente', '2025-08-01', '2025-11-30', 25000.00),
+('App Móvil para Ventas', 'Creación de una aplicación móvil para la fuerza de ventas de Global Marketing.', 3, 2, 'completado', '2025-03-15', '2025-06-30', 20000.00);
+
+SELECT * FROM proyectos;
+        
+        
